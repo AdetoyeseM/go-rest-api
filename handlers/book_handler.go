@@ -2,21 +2,26 @@ package handlers
 
 import (
 	"encoding/json"
+	"first-rest-api/models"
 	"log"
 	"net/http"
-
-	"first-rest-api/models"
 
 	"github.com/gorilla/mux"
 )
 
 var Books []models.Book
 
+func setJSONHeader(writer http.ResponseWriter) {
+	writer.Header().Set("Context-Type", "application/json")
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+	writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
 func GetAllBooks(writer http.ResponseWriter, request *http.Request) {
 
-	writer.Header().Set("Context-Type", "application/json")
-	if err := json.NewEncoder(writer).Encode(Books); 
-	err != nil {
+	setJSONHeader(writer)
+	if err := json.NewEncoder(writer).Encode(Books); err != nil {
 		log.Printf("ERROR: Failed to encode books in GetAllBooks: %v", err)
 		http.Error(writer, "Internal server error", http.StatusInternalServerError)
 		return
@@ -25,7 +30,7 @@ func GetAllBooks(writer http.ResponseWriter, request *http.Request) {
 }
 
 func GetBookByID(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Context-Type", "application/json")
+	setJSONHeader(writer)
 	var parameter = mux.Vars(request)
 
 	for _, item := range Books {
@@ -46,7 +51,7 @@ func GetBookByID(writer http.ResponseWriter, request *http.Request) {
 }
 
 func CreateBook(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Context-Type", "application/json")
+	setJSONHeader(writer)
 	var book models.Book
 	if err := json.NewDecoder(request.Body).Decode(&book); err != nil {
 		log.Printf("ERROR: Failed to decode request body in CreateBook: %v", err)
@@ -64,7 +69,7 @@ func CreateBook(writer http.ResponseWriter, request *http.Request) {
 }
 
 func UpdateBookByID(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Context-Type", "application/json")
+	setJSONHeader(writer)
 
 	parameter := mux.Vars(request)
 
@@ -100,7 +105,7 @@ func UpdateBookByID(writer http.ResponseWriter, request *http.Request) {
 
 func DeleteBookByID(writer http.ResponseWriter, request *http.Request) {
 
-	writer.Header().Set("Content-Type", "application/json")
+	setJSONHeader(writer)
 	params := mux.Vars(request)
 	found := false
 	for index, item := range Books {
