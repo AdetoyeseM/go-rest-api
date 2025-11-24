@@ -14,6 +14,8 @@ func SetupRoutes() *mux.Router {
 	server.HandleFunc("/updateBookByID/{id}", handlers.UpdateBookByID).Methods("PUT")
 
 	server.HandleFunc("/deleteBook/{id}", handlers.DeleteBookByID).Methods("DELETE")
+	server.HandleFunc("/register", handlers.Register).Methods("POST")
+	server.HandleFunc("/login", handlers.LoginUser).Methods("POST")
 
 	return server
 }

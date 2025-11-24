@@ -3,10 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"first-rest-api/models"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 var Books []models.Book
@@ -117,12 +116,13 @@ func DeleteBookByID(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 	if !found {
-		log.Printf("ERROR: Book not found for deletion with ID: %s", params["id"])
+		http.Error(writer, "Book not found for deletion with ID: "+params["id"], http.StatusNotFound)
+		return
 	}
+	log.Printf("SUCCESS: Deleted book with ID: %s", params["id"])
 	if err := json.NewEncoder(writer).Encode(Books); err != nil {
-		log.Printf("ERROR: Failed to encode books in DeleteBookByID: %v", err)
 		http.Error(writer, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
+	log.Printf("SUCCESS: Encoded books in DeleteBookByID")
 }
