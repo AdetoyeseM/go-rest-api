@@ -3,14 +3,42 @@ package validator
 import (
 	"errors"
 	"regexp"
+	"strconv"
 	"unicode"
 )
 
-var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+var (
+	emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+)
+
+var phoneNumberRegex = regexp.MustCompile(`^[0-9]{10}$`)
+var stringRegex = regexp.MustCompile(`^[a-zA-Z]+$`)
+var intRegex = regexp.MustCompile(`^[0-9]+$`)
 
 func ValidateEmail(email string) error {
 	if !emailRegex.MatchString(email) {
 		return errors.New("invalid email format")
+	}
+	return nil
+}
+
+func ValidatePhoneNumber(phoneNumber int) error {
+	if phoneNumber < 10 || !phoneNumberRegex.MatchString(strconv.Itoa(phoneNumber)) {
+		return errors.New("phone number must be at least 10 digits long")
+	}
+	return nil
+}
+
+func ValidateString(str string) error {
+	if str == "" || !stringRegex.MatchString(str) {
+		return errors.New("string is required and must be a valid string")
+	}
+	return nil
+}
+
+func ValidateInt(num int) error {
+	if num == 0 || !intRegex.MatchString(strconv.Itoa(num)) {
+		return errors.New("number is required and must be a valid number")
 	}
 	return nil
 }
