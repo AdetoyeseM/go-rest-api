@@ -7,10 +7,17 @@ import (
 	"first-rest-api/router"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
+	godotenv.Load()
+
+	var a = os.Getenv("SMTP_EMAIL")
+	log.Print("TESTING ENV -- ", a)
 	db.Connect()
 
 	var server = router.SetupRoutes()

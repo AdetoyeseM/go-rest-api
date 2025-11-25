@@ -8,10 +8,8 @@ import (
 	"first-rest-api/response"
 	"first-rest-api/security"
 	"first-rest-api/validator"
-
 	"log"
 	"net/http"
-	// "strconv"
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -121,14 +119,19 @@ func LoginUser(writer http.ResponseWriter, r *http.Request) {
 	var userModel models.UserModel
 	json.NewDecoder(r.Body).Decode(&request)
 
-	query := `SELECT id, email, password_hash FROM users WHERE email=$1`
+	query := `SELECT id, email, password_hash, is_verified FROM users WHERE email=$1`
 
-	error := db.DB.QueryRow(query, request.Email).Scan(&userModel.ID, &userModel.Email, &userModel.Password)
+	error := db.DB.QueryRow(query, request.Email).Scan(&userModel.ID, &userModel.Email, &userModel.Password, &userModel.IsVerified)
 
 	if error != nil {
 		response.JSON(writer, 401, false, "Invalid Credential", nil)
 		return
 	}
+	if !userModel.IsVerified {
+		response.JSON(writer, http.StatusUnavailableForLegalReasons, false, "Account not verified. Check your email for OTP.", nil)
+		return
+	}
+
 	error = security.CheckPassword(userModel.Password, request.Password)
 
 	if error != nil {
@@ -136,17 +139,16 @@ func LoginUser(writer http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := jwt.GenerateToken(userModel.ID, userModel.Email)
+	token, accessError := jwt.GenerateAccessToken(userModel.ID, userModel.Email)
+	refreshtoken, err := jwt.GenerateRefreshToken(userModel.ID, userModel.Email)
 
-	if err != nil {
+	if err != nil || accessError != nil {
 		response.JSON(writer, 401, false, "Error generating token", nil)
 		return
-
 	}
-
 	response.JSON(writer, 200, true, "Login Successful", map[string]interface{}{
-		"token": token,
-		"email": userModel.Email,
+		"accessToken":  token,
+		"refreshToken": refreshtoken,
 	})
 
 }

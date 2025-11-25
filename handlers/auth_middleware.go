@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"first-rest-api/response"
 	"first-rest-api/jwt"
+	"first-rest-api/response"
 )
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
@@ -29,12 +29,12 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		tokenString := parts[1]
 
 		// Validate token
-		claims, err := jwt.ValidateToken(tokenString)
+		claims, err := jwt.ValidateAccessToken(tokenString)
 		if err != nil {
-			response.JSON(w, http.StatusUnauthorized, false, "Invalid or expired token", nil)
+			response.JSON(w, http.StatusUnauthorized, false, err.Error(), nil)
 			return
 		}
- 
+
 		r.Header.Set("X-User-ID", fmt.Sprintf("%d", claims.UserID))
 		r.Header.Set("X-User-Email", claims.Email)
 
